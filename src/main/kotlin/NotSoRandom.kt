@@ -14,11 +14,13 @@ class NotSoRandom {
     }
 
     companion object {
-        private const val theSeed: Int = 1640804512
+        private const val theSeed: Int = 1795683149
         private val mode = MODE.SHUFFLE
 
         var seed = Random.Default.nextInt(Int.MIN_VALUE, Int.MAX_VALUE)
-        private val seeds = listOf(3954422, 13792079, 10732407, 1457961068)
+
+        // private val seeds = listOf(1795683149)
+        private val seeds = listOf(1768272729, -1584289767, 874142081, 558941877, -1489053304, 1617782715)
 
         fun nextRandom() {
             // Generate an int with the default random
@@ -27,9 +29,10 @@ class NotSoRandom {
             theRandom = Random(seed)
         }
 
-        fun nextShift() {
+        fun nextShift(add: List<Int>?) {
             // Find next value or first
-            seed = seeds.zipWithNext().find { it.first == seed }?.second ?: seeds.first()
+            seed = (if (add != null) (seeds + add) else seeds).zipWithNext().find { it.first == seed }?.second
+                ?: seeds.first()
             println(seed)
             theRandom = Random(seed)
         }

@@ -13,9 +13,22 @@ private val KFunction<Operator>.arity: Int
 
 /** Created by Enzo Mallard
  *  The 07/07/2020
+ *  @version 2.0
  */
+
+const val VERSION = "2.0"
+
 val operators =
-    listOf(VariableX::class, VariableY::class, VariableT::class, Sum::class, Sin::class, Constant::class, Level::class)
+    listOf(
+        VariableX::class,
+        VariableY::class,
+        VariableT::class,
+        Sum::class,
+        Sin::class,
+        Constant::class,
+        Level::class,
+        Mix::class
+    )
 
 
 val operators0 = operators.filter { it.constructors.first().parameters.isEmpty() }
@@ -39,8 +52,11 @@ fun main() = application {
         val cb = colorBuffer(width, height, type = ColorType.UINT8)
         val shadow = cb.shadow
 
+        val stack = mutableListOf(-706919937, -210344506, 1763192325, 462162635, 1631502405, -2053914023)
+
         /** Recording attributes **/
-        val videoWriter: VideoWriter = VideoWriter.create()
+        val videoWriter: VideoWriter = VideoWriter
+            .create()
             .size(width, height)
         var recording = 2
         var nFrame = 0
@@ -57,12 +73,16 @@ fun main() = application {
                     /** down */
                     step /= 2
                 }
+                256 -> {
+                    println(stack.joinToString(separator = ", "))
+                    this.application.exit()
+                }
             }
         }
 
         keyboard.character.listen {
             if (it.character == 'n') {
-                NotSoRandom.nextShift()
+                NotSoRandom.nextShift(stack.toList())
                 nextFunction = generate(20)
             }
 
@@ -71,9 +91,17 @@ fun main() = application {
                 nextFunction = generate(20)
             }
 
+            if (it.character == 'p') {
+                stack.add(NotSoRandom.seed)
+            }
+
             if (it.character == 'r') {
                 // start recording
-                videoWriter.output("output_recording_n${recording.format("03")}.mp4".also { t -> println("Start recording ($t)...") })
+                videoWriter.output("output_recording_${NotSoRandom.seed}_${VERSION}_n${recording.format("03")}.mp4".also { t ->
+                    println(
+                        "Start recording ($t)..."
+                    )
+                })
                     .start()
                 recording++
                 tStart = t
@@ -89,7 +117,7 @@ fun main() = application {
                 (0 until height).toList().parallelStream().forEach { h ->
                     val u = 2 * (w + 0.5) / width - 1.0
                     val v = 2 * (h + 0.5) / height - 1.0
-                    val color = function.eval(u, v, sin(t))
+                    val color = function.eval(u, v, t)
 
                     shadow[w, h] = ColorRGBa(color.r, color.g, color.b, a = 1.0)
                 }

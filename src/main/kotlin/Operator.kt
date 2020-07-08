@@ -8,7 +8,8 @@ import kotlin.math.sin
 data class Color(val r: Double, val g: Double, val b: Double) {
     operator fun plus(e: Color): Color = Color(this.r + e.r, this.g + e.g, this.b + e.b)
 
-    operator fun div(i: Int) = Color(r * i, g * i, b * i)
+    operator fun div(i: Double) = Color(r / i, g / i, b / i)
+    operator fun times(i: Double) = Color(r * i, g * i, b * i)
     fun sin(phase: Double, freq: Double) =
         Color(
             sin(phase + freq * this.r),
@@ -57,7 +58,7 @@ class VariableT : Operator(0) {
 }
 
 class Sum(private val e1: Operator, private val e2: Operator) : Operator(2) {
-    override fun eval(x: Double, y: Double, t: Double): Color = (e1.eval(x, y, t) + e2.eval(x, y, t)) / 2
+    override fun eval(x: Double, y: Double, t: Double): Color = (e1.eval(x, y, t) + e2.eval(x, y, t)) / 2.0
 
     override fun toString(): String = "$e1 + $e2"
 }
@@ -84,4 +85,11 @@ class Level(private val level: Operator, private val e1: Operator, private val e
         Color.level(threshold, level.eval(x, y, t), e1.eval(x, y, t), e2.eval(x, y, t))
 
     override fun toString(): String = "Level($level < $threshold)($e1,$e2)"
+}
+
+class Mix(private val w: Operator, private val e1: Operator, private val e2: Operator) : Operator(3) {
+    override fun eval(x: Double, y: Double, t: Double): Color =
+        (e1.eval(x, y, t) + e2.eval(x, y, t)) * (0.5 * (w.eval(x, y, t).r + 1.0))
+
+    override fun toString(): String = "($w * ($e1 + $e2))"
 }
