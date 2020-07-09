@@ -52,7 +52,21 @@ fun main() = application {
         val cb = colorBuffer(width, height, type = ColorType.UINT8)
         val shadow = cb.shadow
 
-        val stack = mutableListOf(-706919937, -210344506, 1763192325, 462162635, 1631502405, -2053914023)
+        val stack = mutableListOf(
+            -706919937,
+            -210344506,
+            1763192325,
+            462162635,
+            1631502405,
+            -2053914023,
+            757469263,
+            2062128261,
+            1747630775,
+            922979345,
+            1852756252,
+            167516583,
+            -829879681
+        )
 
         /** Recording attributes **/
         val videoWriter: VideoWriter = VideoWriter
@@ -117,7 +131,7 @@ fun main() = application {
                 (0 until height).toList().parallelStream().forEach { h ->
                     val u = 2 * (w + 0.5) / width - 1.0
                     val v = 2 * (h + 0.5) / height - 1.0
-                    val color = function.eval(u, v, t)
+                    val color = function.eval(u, v, sin(t))
 
                     shadow[w, h] = ColorRGBa(color.r, color.g, color.b, a = 1.0)
                 }

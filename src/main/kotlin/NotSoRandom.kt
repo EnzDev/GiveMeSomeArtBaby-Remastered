@@ -18,7 +18,6 @@ class NotSoRandom {
         private val mode = MODE.SHUFFLE
 
         var seed = Random.Default.nextInt(Int.MIN_VALUE, Int.MAX_VALUE)
-
         // private val seeds = listOf(1795683149)
         private val seeds = listOf(1768272729, -1584289767, 874142081, 558941877, -1489053304, 1617782715)
 
