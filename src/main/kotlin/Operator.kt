@@ -6,8 +6,22 @@ import kotlin.math.sin
  */
 
 data class Color(val r: Double, val g: Double, val b: Double) {
+    /**
+     * Color computations
+     */
     operator fun plus(e: Color): Color = Color(this.r + e.r, this.g + e.g, this.b + e.b)
+    operator fun rem(e: Color): Color =
+        Color(
+            (this.r % e.r).takeIf { !it.isNaN() } ?: 0.0,
+            (this.g % e.g).takeIf { !it.isNaN() } ?: 0.0,
+            (this.b % e.b).takeIf { !it.isNaN() } ?: 0.0
+        )
 
+    operator fun times(e: Color) = Color(this.r * e.r, this.g * e.g, this.b * e.b)
+
+    /**
+     * Scalar
+     */
     operator fun div(i: Double) = Color(r / i, g / i, b / i)
     operator fun times(i: Double) = Color(r * i, g * i, b * i)
     fun sin(phase: Double, freq: Double) =
@@ -92,4 +106,18 @@ class Mix(private val w: Operator, private val e1: Operator, private val e2: Ope
         (e1.eval(x, y, t) + e2.eval(x, y, t)) * (0.5 * (w.eval(x, y, t).r + 1.0))
 
     override fun toString(): String = "($w * ($e1 + $e2))"
+}
+
+class Mod(private val e1: Operator, private val e2: Operator) : Operator(2) {
+    override fun eval(x: Double, y: Double, t: Double): Color =
+        e1.eval(x, y, t) % e2.eval(x, y, t)
+
+    override fun toString(): String = "($e1 % $e2)"
+}
+
+class Product(private val e1: Operator, private val e2: Operator) : Operator(2) {
+    override fun eval(x: Double, y: Double, t: Double): Color =
+        e1.eval(x, y, t) * e2.eval(x, y, t)
+
+    override fun toString(): String = "($e1 * $e2)"
 }

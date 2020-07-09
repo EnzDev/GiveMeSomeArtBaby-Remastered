@@ -16,7 +16,7 @@ private val KFunction<Operator>.arity: Int
  *  @version 2.0
  */
 
-const val VERSION = "2.0"
+const val VERSION = "2"
 
 val operators =
     listOf(
@@ -27,7 +27,9 @@ val operators =
         Sin::class,
         Constant::class,
         Level::class,
-        Mix::class
+        Mix::class,
+        Mod::class,
+        Product::class
     )
 
 
@@ -53,23 +55,11 @@ fun main() = application {
         val shadow = cb.shadow
 
         val stack = mutableListOf(
-            -706919937,
-            -210344506,
-            1763192325,
-            462162635,
-            1631502405,
-            -2053914023,
-            757469263,
-            2062128261,
-            1747630775,
-            922979345,
-            1852756252,
-            167516583,
-            -829879681
+            843526649, 558962929, 1203708930, 1549858508, -1042163653
         )
 
         /** Recording attributes **/
-        val videoWriter: VideoWriter = VideoWriter
+        var videoWriter: VideoWriter = VideoWriter
             .create()
             .size(width, height)
         var recording = 2
@@ -111,20 +101,21 @@ fun main() = application {
 
             if (it.character == 'r') {
                 // start recording
-                videoWriter.output("output_recording_${NotSoRandom.seed}_${VERSION}_n${recording.format("03")}.mp4".also { t ->
-                    println(
-                        "Start recording ($t)..."
-                    )
-                })
-                    .start()
+                videoWriter = VideoWriter
+                    .create()
+                    .size(width, height)
+                    .output("recording_${NotSoRandom.seed}_${VERSION}_n${recording.format("03")}.mp4".also { t ->
+                        println("Start recording ($t)...")
+                    }).start()
                 recording++
-                tStart = t
                 record = true
                 nFrame = 0
             }
         }
 
         extend {
+            if (record && nFrame == 0) tStart = t
+
             shadow.download()
 
             (0 until width).toList().parallelStream().forEach { w ->
@@ -141,12 +132,12 @@ fun main() = application {
             drawer.image(cb)
             if (record) {
                 videoWriter.frame(cb)
-                println("Frame $nFrame")
+                "Frame $nFrame (${100 * t / (tStart + PI * 2)}%)".msg()
             }
 
             if (record) {
                 nFrame++
-                if (tStart + 1.5 * PI < t) { // last section
+                if (tStart + 1.5 * PI < t) { // check in last section
                     // look at the direction
                     if ((sin(t) > sin(t + step) && sin(t + step) < sin(tStart))
                         || (sin(t) < sin(t + step) && sin(t + step) > sin(tStart))
@@ -164,6 +155,9 @@ fun main() = application {
                 step = 0.01
                 t = 0.0
                 function = it
+
+                println(function)
+
                 nextFunction = null
 
                 if (record) {
@@ -179,6 +173,10 @@ fun main() = application {
     }
 }
 
+/**
+ * Generate an operator of form f(x, y, t) = (r, g, b) using k nodes
+ * Recursively let the child an amount of operators until at least k operators has been created
+ */
 fun generate(k: Int = 50): Operator {
     if (k <= 0) // No more ops, put a leaf
         return operators0.random(theRandom).constructors.first().call()
@@ -204,3 +202,9 @@ fun generate(k: Int = 50): Operator {
 fun Int.format(digits: String): String {
     return "%${digits}d".format(this)
 }
+
+fun Double.format(digits: String): String {
+    return "%${digits}f".format(this)
+}
+
+fun String.msg() = println(this)
